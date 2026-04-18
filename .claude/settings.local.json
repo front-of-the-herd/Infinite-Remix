@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew list:*)",
+      "Bash(pip3.13 install:*)",
+      "Bash(pip3.13 index:*)",
+      "Bash(curl -s \"https://pypi.org/pypi/torch/json\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); vers=list\\(d[''''releases''''].keys\\(\\)\\); print\\(''''Latest:'''', vers[-1]\\); print\\(''''Has 3.13 wheel:'''', any\\(''''cp313'''' in str\\(d[''''releases''''][v]\\) for v in vers[-5:]\\)\\)\")",
+      "Bash(python3.13 -c \"import platform; print\\(platform.machine\\(\\), platform.system\\(\\)\\)\")",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" install torch --verbose)",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" install torch)",
+      "Bash(grep -v \"^$\")",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" install --upgrade pip)",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/python3.13\" -c \":*)",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" install torch --platform macosx_14_0_x86_64 --only-binary=:all:)",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" download torch --platform macosx_14_0_x86_64 --python-version 313 --only-binary=:all: --dest /tmp/torch-dl)",
+      "Bash(\"/Users/mattstephens/AI-Projects/Infinite Remix/.venv313/bin/pip\" download torch --platform macosx_11_0_x86_64 --python-version 312 --only-binary=:all: --dest /tmp/torch-dl)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pkill -f \"next dev\")"
+    ]
+  }
+}

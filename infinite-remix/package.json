@@ -1,0 +1,32 @@
+{
+  "name": "infinite-remix",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "lyria": "node lyria-server.mjs",
+    "dev:full": "concurrently \"npm run dev\" \"npm run lyria\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "bufferutil": "^4.1.0",
+    "concurrently": "^9.2.1",
+    "next": "15.x",
+    "react": "^19",
+    "react-dom": "^19",
+    "tone": "^15",
+    "utf-8-validate": "^6.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^8",
+    "postcss": "^8",
+    "tailwindcss": "^3",
+    "typescript": "^5"
+  }
+}

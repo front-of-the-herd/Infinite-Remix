@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent: #f97316;
+}
+
+body {
+  background-color: #030712;
+  color: #f8fafc;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas,
+    'DejaVu Sans Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Phase glow animations */
+@keyframes phase-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.phase-active {
+  animation: phase-pulse 2s ease-in-out infinite;
+}

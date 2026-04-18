@@ -1,0 +1,25 @@
+{
+  "spike": "demucs-stem-separation",
+  "model": "htdemucs",
+  "mode": "--two-stems vocals",
+  "source_file": "test/seeds/_Fascinated___Company_B__retro-remix_.mp3",
+  "processing_time_s": 275,
+  "status": "PENDING_MANUAL_REVIEW",
+  "stems": {
+    "vocals":       { "file": "spikes/demucs/output/vocals_48k.wav",       "mean_vol_db": -22.6 },
+    "instrumental": { "file": "spikes/demucs/output/instrumental_48k.wav",  "mean_vol_db": -14.4 }
+  },
+  "bleed_test": {
+    "low_freq_80_200hz_db": "-39.8",
+    "high_freq_1khz_plus_db": "-25.0",
+    "verdict": "14.8dB delta → ACCEPTABLE — some bleed"
+  },
+  "slices_created": 8,
+  "slice_dir": "spikes/demucs/output/slices/",
+  "manual_checks": [
+    "Listen to vocals_chorus_0.wav — does the vocal sound isolated and clean?",
+    "Listen to vocals_verse_0.wav — is it natural enough to play at a Peak phase?",
+    "Listen to instrumental_48k.wav — does it sound full without the vocal?",
+    "Compare Demucs vocals vs Suno stem separation (next spike) on same file"
+  ]
+}

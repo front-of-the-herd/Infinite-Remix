@@ -1,0 +1,12 @@
+.env
+.DS_Store
+.venv*
+node_modules/
+*.zip
+*.wav
+*.mp3
+spikes/**/output/
+.next/
+dist/
+out/
+build/

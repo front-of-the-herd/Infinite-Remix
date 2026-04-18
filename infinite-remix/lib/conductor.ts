@@ -156,9 +156,9 @@ export class SectionConductor {
     return eligible[idx];
   }
 
-  // True during breakdown — signal to pre-generate next Suno segment
+  // True during build phase — gives Suno ~80s to pre-generate next segment before drift phase
   get preGenerate(): boolean {
-    return this.phase === 'breakdown';
+    return this.phase === 'build';
   }
 
   // Full snapshot of conductor state

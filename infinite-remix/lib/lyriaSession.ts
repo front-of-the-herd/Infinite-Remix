@@ -50,6 +50,7 @@ export class LyriaSession {
   private mixer: HybridMixer;
   private nextPlayTime: number = 0;
   private abortController: AbortController | null = null;
+  private fallbackOscillators: OscillatorNode[] = [];
 
   constructor(mixer: HybridMixer) {
     this.ctx   = mixer.audioContext;
@@ -74,22 +75,33 @@ export class LyriaSession {
       if ((err as Error).name !== 'AbortError') {
         console.error('LyriaSession: fetch failed', err);
       }
+      this.startFallbackSynth();
       return;
     }
 
     if (!response.ok || !response.body) {
       console.error('LyriaSession: bad response', response.status);
+      this.startFallbackSynth();
       return;
     }
 
     const reader = response.body.getReader();
     // Accumulate bytes across fetch chunks so we always process complete stereo frames
     let leftover = new Uint8Array(0);
+    let decodedChunks = 0;
 
     try {
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          if (decodedChunks === 0) {
+            console.warn('LyriaSession: Stream closed immediately. Starting fallback synth.');
+            this.startFallbackSynth();
+          }
+          break;
+        }
+
+        decodedChunks++;
 
         // Prepend any leftover bytes from the previous iteration
         const incoming = new Uint8Array(leftover.length + value.length);
@@ -134,7 +146,46 @@ export class LyriaSession {
     console.log('LyriaSession: updatePrompts called — not yet implemented');
   }
 
+  private startFallbackSynth() {
+    if (this.fallbackOscillators.length > 0) return;
+    console.log('LyriaSession: Starting ambient WebAudio fallback');
+    
+    // F minor chord frequencies
+    const freqs = [174.61, 207.65, 261.63]; 
+    
+    freqs.forEach(freq => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      
+      // Lush slow modulation
+      const lfo = this.ctx.createOscillator();
+      const lfoGain = this.ctx.createGain();
+      lfo.type = 'sine';
+      lfo.frequency.value = 0.1 + Math.random() * 0.1;
+      lfoGain.gain.value = 4;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfo.start();
+      
+      // Keep it extremely quiet/ambient and route to the 'lyria' mixer channel
+      gain.gain.value = 0.15;
+      
+      osc.connect(gain);
+      gain.connect(this.mixer.getGainNode('lyria'));
+      
+      osc.start();
+      this.fallbackOscillators.push(osc, lfo);
+    });
+  }
+
   stop(): void {
     this.abortController?.abort();
+    this.fallbackOscillators.forEach(osc => {
+      try { osc.stop(); osc.disconnect(); } catch {}
+    });
+    this.fallbackOscillators = [];
   }
 }

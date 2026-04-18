@@ -110,6 +110,12 @@ export default function Player({ dna }: PlayerProps) {
 
     setStarted(true);
 
+    // Initial Suno pre-generation for Cycle 0
+    const initState = conductor.getState();
+    if (initState.preGenerate) {
+       triggerPreGenerate(initState);
+    }
+
     // Tick every second
     tickRef.current = setInterval(() => {
       const c  = conductorRef.current;
@@ -123,7 +129,7 @@ export default function Player({ dna }: PlayerProps) {
         const m = mixerRef.current;
         m?.transitionToPhase(snap.weights);
 
-        // Trigger Suno pre-generation when entering breakdown
+        // Trigger Suno pre-generation when entering build phase
         if (snap.preGenerate) {
           triggerPreGenerate(snap);
         }

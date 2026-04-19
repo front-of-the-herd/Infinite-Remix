@@ -1,14 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SeedInputProps {
   onGenerate: (url: string) => void;
   loading: boolean;
+  value?: string;
 }
 
-export default function SeedInput({ onGenerate, loading }: SeedInputProps) {
+export default function SeedInput({ onGenerate, loading, value }: SeedInputProps) {
   const [url, setUrl] = useState('');
+
+  // Auto-fill from parent when value prop arrives
+  useEffect(() => {
+    if (value) setUrl(value);
+  }, [value]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

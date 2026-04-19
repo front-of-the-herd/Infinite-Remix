@@ -202,7 +202,7 @@ export default function Player({ dna }: PlayerProps) {
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">
-            <span className="text-orange-500">∞</span> Infinite Remix
+            It's <span className="text-orange-500 italic">a song</span> all the way down
           </h1>
           <p className="text-slate-500 text-sm">
             {dna.meta.title} — {dna.meta.artist}

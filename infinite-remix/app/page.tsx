@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import SeedInput from '@/components/SeedInput';
 import Player from '@/components/Player';
+import AnimatedTitle from '@/components/AnimatedTitle';
 import type { SongDNA } from '@/types';
 
 export default function Home() {
   const [dna, setDna] = useState<SongDNA | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [finalSong, setFinalSong] = useState<string | undefined>(undefined);
 
   async function handleGenerate(url: string) {
     setLoading(true);
@@ -38,15 +40,15 @@ export default function Home() {
       <div className="w-full max-w-lg space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <h1 className="text-5xl font-bold tracking-tight">
-            <span className="text-orange-500">∞</span> Infinite Remix
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+            It's <AnimatedTitle onComplete={setFinalSong} /> all the way down
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
             Feed it a song. It remixes forever — never loops, always evolving.
           </p>
         </div>
 
-        <SeedInput onGenerate={handleGenerate} loading={loading} />
+        <SeedInput onGenerate={handleGenerate} loading={loading} value={finalSong} />
 
         {error && (
           <p className="text-center text-red-400 text-sm border border-red-900 rounded-lg px-4 py-3">

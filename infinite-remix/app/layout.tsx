@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Infinite Remix ∞',
+  title: 'All the way down ∞',
   description:
     'Takes a seed song and generates an infinite, continuously evolving remix — never loops, always progressing.',
 };

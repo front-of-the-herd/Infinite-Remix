@@ -1,4 +1,5 @@
 export type Phase = 'build' | 'peak' | 'breakdown' | 'drift' | 'rebuild';
+export type InstrumentalEngine = 'tonejs' | 'suno';
 
 export interface VocalSlice {
   type: 'intro' | 'verse' | 'chorus' | 'bridge' | 'outro';

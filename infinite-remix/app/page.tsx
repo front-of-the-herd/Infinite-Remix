@@ -4,17 +4,19 @@ import { useState } from 'react';
 import SeedInput from '@/components/SeedInput';
 import Player from '@/components/Player';
 import AnimatedTitle from '@/components/AnimatedTitle';
-import type { SongDNA } from '@/types';
+import type { SongDNA, InstrumentalEngine } from '@/types';
 
 export default function Home() {
   const [dna, setDna] = useState<SongDNA | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [finalSong, setFinalSong] = useState<string | undefined>(undefined);
+  const [enginePref, setEnginePref] = useState<InstrumentalEngine>('tonejs');
 
-  async function handleGenerate(url: string) {
+  async function handleGenerate(url: string, engine: InstrumentalEngine) {
     setLoading(true);
     setError(null);
+    setEnginePref(engine);
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
@@ -32,7 +34,7 @@ export default function Home() {
   }
 
   if (dna) {
-    return <Player dna={dna} />;
+    return <Player dna={dna} engine={enginePref} />;
   }
 
   return (

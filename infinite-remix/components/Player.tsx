@@ -9,18 +9,21 @@ import type { InstrumentalSession } from '@/lib/instrumentalSession';
 import PhaseStrip from './PhaseStrip';
 import SourceMeters from './SourceMeters';
 import LyricsDisplay from './LyricsDisplay';
+import type { Phase, InstrumentalEngine } from '@/types';
 
+// The Player receives the parsed SongDNA and the user's selected generator engine
 interface PlayerProps {
   dna: SongDNA;
+  engine: InstrumentalEngine;
 }
 
 const INITIAL_WEIGHTS: SourceWeights = PHASE_WEIGHTS['build'];
 
-export default function Player({ dna }: PlayerProps) {
+export default function Player({ dna, engine }: PlayerProps) {
   const conductorRef    = useRef<SectionConductor | null>(null);
   const mixerRef        = useRef<import('@/lib/mixer').HybridMixer | null>(null);
   const stemPlayerRef   = useRef<StemPlayer | null>(null);
-  const instrumentalSessionRef = useRef<InstrumentalSession | null>(null);
+  const instrumentalSessionRef = useRef<any>(null); // Type 'any' to support both InstrumentalSession and SunoInstrumentalPlayer
   const tickRef         = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [state, setState] = useState<ConductorState>({
@@ -40,6 +43,7 @@ export default function Player({ dna }: PlayerProps) {
   });
   const [progress, setProgress] = useState(0);
   const [started,  setStarted]  = useState(false);
+  const [sunoGenerating, setSunoGenerating] = useState(false);
   const [nextVocalUrl, setNextVocalUrl] = useState<string | null>(null);
   const [driftLyrics, setDriftLyrics] = useState<string | null>(null);
   const [activeLyrics, setActiveLyrics] = useState<string | null>(null);
@@ -74,10 +78,9 @@ export default function Player({ dna }: PlayerProps) {
     if (started) return;
 
     // Lazy-import browser-only modules (requires user gesture for AudioContext)
-    const [{ HybridMixer }, { StemPlayer: StemPlayerClass }, { InstrumentalSession: InstrumentalSessionClass }, Tone] = await Promise.all([
+    const [{ HybridMixer }, { StemPlayer: StemPlayerClass }, Tone] = await Promise.all([
       import('@/lib/mixer'),
       import('@/lib/stemPlayer'),
-      import('@/lib/instrumentalSession'),
       import('tone'),
     ]);
 
@@ -91,8 +94,31 @@ export default function Player({ dna }: PlayerProps) {
     const stemPlayer = new StemPlayerClass(mixer);
     stemPlayerRef.current = stemPlayer;
 
-    const instrumentalSession = new InstrumentalSessionClass(mixer);
-    instrumentalSessionRef.current = instrumentalSession;
+    // Engine Selection Logic
+    let activeInstrumentalEngine: any = null;
+    if (engine === 'suno') {
+      setSunoGenerating(true);
+      const { generateInstrumental } = await import('@/lib/sunoClient');
+      const { SunoInstrumentalPlayer } = await import('@/lib/sunoInstrumentalPlayer');
+      
+      try {
+        const url = await generateInstrumental(dna);
+        activeInstrumentalEngine = new SunoInstrumentalPlayer(mixer, url);
+        await activeInstrumentalEngine.load();
+      } catch (err) {
+        console.error('Suno instrumental generation failed:', err);
+        // Fallback to ToneJS if Suno generation fails completely
+        const { InstrumentalSession } = await import('@/lib/instrumentalSession');
+        activeInstrumentalEngine = new InstrumentalSession(mixer);
+      } finally {
+        setSunoGenerating(false);
+      }
+    } else {
+      const { InstrumentalSession } = await import('@/lib/instrumentalSession');
+      activeInstrumentalEngine = new InstrumentalSession(mixer);
+    }
+    
+    instrumentalSessionRef.current = activeInstrumentalEngine;
 
     const conductor = new SectionConductor(dna);
     conductorRef.current = conductor;
@@ -100,10 +126,10 @@ export default function Player({ dna }: PlayerProps) {
     // Apply initial weights
     mixer.transitionToPhase(conductor.weights, 0);
 
-    // Initial state sync and start the generative engine
+    // Build initial evolution
     const initialEvolution = conductor.evolution;
-    instrumentalSession.updateState(conductor.phase, initialEvolution);
-    instrumentalSession.start();
+    activeInstrumentalEngine.updateState(conductor.phase, initialEvolution);
+    activeInstrumentalEngine.start();
 
     setStarted(true);
 
@@ -184,7 +210,7 @@ export default function Player({ dna }: PlayerProps) {
       setState(snap);
       setProgress(c.phaseProgress);
     }, 1000);
-  }, [dna, started, triggerPreGenerate]);
+  }, [dna, started, triggerPreGenerate, engine]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -210,21 +236,26 @@ export default function Player({ dna }: PlayerProps) {
         </div>
 
         {/* Start button (required for AudioContext) */}
-        {!started && (
-          <div className="flex justify-center">
-            <button
-              onClick={start}
-              className="rounded-full bg-orange-500 px-8 py-3 font-semibold text-white hover:bg-orange-400 transition-colors"
-            >
-              Start ∞
-            </button>
+        {!started ? (
+          <button
+            onClick={start}
+            className="w-full rounded-lg bg-orange-500 py-4 text-xl font-black tracking-widest text-white shadow-lg hover:bg-orange-400"
+          >
+            Start ∞
+          </button>
+        ) : sunoGenerating ? (
+          <button disabled className="w-full flex items-center justify-center gap-3 rounded-lg bg-slate-800 py-4 text-lg font-bold tracking-widest text-slate-400 shadow-inner">
+            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+            Generating Backing Track (~75s)...
+          </button>
+        ) : (
+          <div className="rounded-xl border border-slate-800 bg-gray-900 p-4 space-y-4">
+            <PhaseStrip currentPhase={state.phase} progress={progress} />
           </div>
         )}
-
-        {/* Phase strip */}
-        <div className="rounded-xl border border-slate-800 bg-gray-900 p-4 space-y-4">
-          <PhaseStrip currentPhase={state.phase} progress={progress} />
-        </div>
 
         {/* Conductor info */}
         <div className="grid grid-cols-3 gap-3 text-center">

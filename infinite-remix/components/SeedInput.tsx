@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { InstrumentalEngine } from '@/types';
 
 interface SeedInputProps {
-  onGenerate: (url: string) => void;
+  onGenerate: (url: string, engine: InstrumentalEngine) => void;
   loading: boolean;
   value?: string;
 }
 
 export default function SeedInput({ onGenerate, loading, value }: SeedInputProps) {
   const [url, setUrl] = useState('');
+  const [engine, setEngine] = useState<InstrumentalEngine>('tonejs');
 
   // Auto-fill from parent when value prop arrives
   useEffect(() => {
@@ -19,11 +21,11 @@ export default function SeedInput({ onGenerate, loading, value }: SeedInputProps
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = url.trim();
-    if (trimmed) onGenerate(trimmed);
+    if (trimmed) onGenerate(trimmed, engine);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="relative">
         <input
           type="text"
@@ -38,6 +40,27 @@ export default function SeedInput({ onGenerate, loading, value }: SeedInputProps
             disabled:opacity-50 transition-colors
           "
         />
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-4 bg-gray-900 border border-slate-700 p-1.5 rounded-full w-max mx-auto shadow-inner">
+        <button
+          type="button"
+          onClick={() => setEngine('tonejs')}
+          className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+            engine === 'tonejs' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Tone.js Synth (free)
+        </button>
+        <button
+          type="button"
+          onClick={() => setEngine('suno')}
+          className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+            engine === 'suno' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Suno AI Instrumental (uses credits)
+        </button>
       </div>
 
       <button

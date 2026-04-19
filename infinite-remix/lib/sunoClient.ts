@@ -199,3 +199,48 @@ export async function generateDriftVocal(
 
   return { audioUrl, lyrics };
 }
+
+/**
+ * Strategy A: Generate a single deep instrumental bed for ambient looping
+ */
+export async function generateInstrumental(
+  dna: SongDNA,
+  apiKey?: string
+): Promise<string> {
+  const style = `${dna.musical.genreTags.join(', ')}, instrumental, continuous mix, hypnotic loop`;
+  
+  const genResult = await apiFetch<GenerateResult>(
+    'POST',
+    '/api/v1/generate',
+    {
+      customMode:          true,
+      instrumental:        true,
+      model:               'V5',
+      prompt:              '',
+      style,
+      title:               `${dna.meta.title} Instrumental Bed`,
+      vocalGender:         '',
+      weirdnessConstraint: 0.1,
+      callBackUrl:         'https://example.com/noop',
+    },
+    apiKey
+  );
+
+  const { taskId } = genResult;
+  if (!taskId) throw new Error('Suno: no taskId returned for instrumental');
+
+  const details = await poll(
+    `/api/v1/generate/record-info?taskId=${taskId}`,
+    data => data?.status === 'SUCCESS' && (data?.response?.sunoData?.length ?? 0) > 0,
+    apiKey
+  );
+
+  const songs = details.response?.sunoData;
+  if (!songs || songs.length === 0) throw new Error('Suno: no instrumental songs returned');
+
+  const song = songs[0];
+  const audioUrl = song.audioUrl ?? song.audio_url;
+  if (!audioUrl) throw new Error('Suno: missing audioUrl in instrumental response');
+
+  return audioUrl;
+}

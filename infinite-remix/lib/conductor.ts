@@ -28,27 +28,27 @@ export const PHASE_DURATIONS_S: Record<Phase, number> = {
 // Gain weights per phase for each of the three audio sources (0–1)
 export const PHASE_WEIGHTS: Record<Phase, SourceWeights> = {
   build: {
-    lyria:        0.8,
+    instrumental: 0.8,
     originalStem: 0.3,
     suno:         0.0,
   },
   peak: {
-    lyria:        0.6,
+    instrumental: 0.6,
     originalStem: 1.0,
     suno:         0.0,
   },
   breakdown: {
-    lyria:        1.0,
+    instrumental: 1.0,
     originalStem: 0.0,
     suno:         0.0,
   },
   drift: {
-    lyria:        0.7,
+    instrumental: 0.7,
     originalStem: 0.0,
     suno:         0.9,
   },
   rebuild: {
-    lyria:        0.8,
+    instrumental: 0.8,
     originalStem: 0.4,
     suno:         0.5,
   },

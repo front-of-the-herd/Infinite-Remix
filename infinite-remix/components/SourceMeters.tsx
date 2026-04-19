@@ -15,8 +15,8 @@ interface MeterConfig {
 
 const METERS: MeterConfig[] = [
   {
-    key:        'lyria',
-    label:      'Lyria',
+    key:        'instrumental',
+    label:      'Inst.',
     barColor:   'bg-cyan-400',
     trackColor: 'bg-cyan-950',
   },

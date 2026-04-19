@@ -34,7 +34,7 @@ export interface SongDNA {
 }
 
 export interface SourceWeights {
-  lyria: number;
+  instrumental: number;
   originalStem: number;
   suno: number;
 }

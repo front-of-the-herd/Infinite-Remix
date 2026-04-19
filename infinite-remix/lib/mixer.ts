@@ -4,7 +4,7 @@ import type { SourceWeights } from '@/types';
 
 export class HybridMixer {
   private ctx: AudioContext;
-  private gains: { lyria: GainNode; originalStem: GainNode; suno: GainNode };
+  private gains: { instrumental: GainNode; originalStem: GainNode; suno: GainNode };
   private compressor: DynamicsCompressorNode;
   private sunoSource: AudioBufferSourceNode | null = null;
 
@@ -13,7 +13,7 @@ export class HybridMixer {
 
     // Create gain nodes for each source
     this.gains = {
-      lyria:        this.ctx.createGain(),
+      instrumental: this.ctx.createGain(),
       originalStem: this.ctx.createGain(),
       suno:         this.ctx.createGain(),
     };
@@ -52,14 +52,14 @@ export class HybridMixer {
     const now = this.ctx.currentTime;
     const target = now + fadeDuration;
 
-    this.gains.lyria.gain.linearRampToValueAtTime(weights.lyria, target);
+    this.gains.instrumental.gain.linearRampToValueAtTime(weights.instrumental, target);
     this.gains.originalStem.gain.linearRampToValueAtTime(weights.originalStem, target);
     this.gains.suno.gain.linearRampToValueAtTime(weights.suno, target);
   }
 
-  // Stub — wire to Lyria RealTime WebSocket in Phase 3
-  connectLyriaStream(_stream: AudioNode): void {
-    console.log('Mixer: connectLyriaStream called — not yet implemented');
+  // Connects the Tone.js transport output to the instrumental gain node
+  connectInstrumentalStream(stream: AudioNode): void {
+    stream.connect(this.gains.instrumental);
   }
 
   // Play a decoded Suno vocal segment through the suno gain node.

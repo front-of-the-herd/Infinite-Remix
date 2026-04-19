@@ -4,8 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "lyria": "node lyria-server.mjs",
-    "dev:full": "concurrently \"npm run dev\" \"npm run lyria\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

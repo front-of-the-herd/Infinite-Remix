@@ -5,7 +5,7 @@ import type { SongDNA, ConductorState, SourceWeights } from '@/types';
 import { SectionConductor } from '@/lib/conductor';
 import { PHASE_WEIGHTS } from '@/lib/conductor';
 import type { StemPlayer } from '@/lib/stemPlayer';
-import type { LyriaSession } from '@/lib/lyriaSession';
+import type { InstrumentalSession } from '@/lib/instrumentalSession';
 import PhaseStrip from './PhaseStrip';
 import SourceMeters from './SourceMeters';
 import LyricsDisplay from './LyricsDisplay';
@@ -20,7 +20,7 @@ export default function Player({ dna }: PlayerProps) {
   const conductorRef    = useRef<SectionConductor | null>(null);
   const mixerRef        = useRef<import('@/lib/mixer').HybridMixer | null>(null);
   const stemPlayerRef   = useRef<StemPlayer | null>(null);
-  const lyriaSessionRef = useRef<LyriaSession | null>(null);
+  const instrumentalSessionRef = useRef<InstrumentalSession | null>(null);
   const tickRef         = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [state, setState] = useState<ConductorState>({
@@ -74,10 +74,10 @@ export default function Player({ dna }: PlayerProps) {
     if (started) return;
 
     // Lazy-import browser-only modules (requires user gesture for AudioContext)
-    const [{ HybridMixer }, { StemPlayer: StemPlayerClass }, { LyriaSession: LyriaSessionClass }, Tone] = await Promise.all([
+    const [{ HybridMixer }, { StemPlayer: StemPlayerClass }, { InstrumentalSession: InstrumentalSessionClass }, Tone] = await Promise.all([
       import('@/lib/mixer'),
       import('@/lib/stemPlayer'),
-      import('@/lib/lyriaSession'),
+      import('@/lib/instrumentalSession'),
       import('tone'),
     ]);
 
@@ -91,8 +91,8 @@ export default function Player({ dna }: PlayerProps) {
     const stemPlayer = new StemPlayerClass(mixer);
     stemPlayerRef.current = stemPlayer;
 
-    const lyriaSession = new LyriaSessionClass(mixer);
-    lyriaSessionRef.current = lyriaSession;
+    const instrumentalSession = new InstrumentalSessionClass(mixer);
+    instrumentalSessionRef.current = instrumentalSession;
 
     const conductor = new SectionConductor(dna);
     conductorRef.current = conductor;
@@ -100,13 +100,10 @@ export default function Player({ dna }: PlayerProps) {
     // Apply initial weights
     mixer.transitionToPhase(conductor.weights, 0);
 
-    // Build the initial evolution to pass to Lyria
+    // Initial state sync and start the generative engine
     const initialEvolution = conductor.evolution;
-
-    // Start Lyria streaming — fire-and-forget; it runs until stop() is called
-    lyriaSession.connect(dna, initialEvolution).catch(err =>
-      console.warn('LyriaSession: connect error', err)
-    );
+    instrumentalSession.updateState(conductor.phase, initialEvolution);
+    instrumentalSession.start();
 
     setStarted(true);
 
@@ -128,6 +125,11 @@ export default function Player({ dna }: PlayerProps) {
       if (phaseChanged) {
         const m = mixerRef.current;
         m?.transitionToPhase(snap.weights);
+        
+        // Sync generative instrumental engine to new conductor state
+        if (instrumentalSessionRef.current) {
+          instrumentalSessionRef.current.updateState(snap.phase, snap.evolution);
+        }
 
         // Trigger Suno pre-generation when entering build phase
         if (snap.preGenerate) {
@@ -188,7 +190,7 @@ export default function Player({ dna }: PlayerProps) {
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
-      lyriaSessionRef.current?.stop();
+      instrumentalSessionRef.current?.dispose();
       stemPlayerRef.current?.dispose();
       mixerRef.current?.dispose();
     };

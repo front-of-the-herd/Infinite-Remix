@@ -84,7 +84,7 @@ export default function Player({ dna }: PlayerProps) {
     // Tone.start() unblocks the AudioContext after the user gesture
     await Tone.start();
 
-    const mixer = new HybridMixer();
+    const mixer = new HybridMixer(Tone.getContext().rawContext as AudioContext);
     await mixer.resume();
     mixerRef.current = mixer;
 

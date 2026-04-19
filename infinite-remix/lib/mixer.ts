@@ -8,8 +8,8 @@ export class HybridMixer {
   private compressor: DynamicsCompressorNode;
   private sunoSource: AudioBufferSourceNode | null = null;
 
-  constructor() {
-    this.ctx = new AudioContext();
+  constructor(ctx?: AudioContext) {
+    this.ctx = ctx || new AudioContext();
 
     // Create gain nodes for each source
     this.gains = {

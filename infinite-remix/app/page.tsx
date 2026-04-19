@@ -40,8 +40,10 @@ export default function Home() {
       <div className="w-full max-w-lg space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-            It's <AnimatedTitle onComplete={setFinalSong} /> all the way down
+          <h1 className="flex flex-col items-center text-4xl sm:text-5xl font-bold tracking-tight leading-tight gap-2 sm:gap-3">
+            <span>It's</span>
+            <AnimatedTitle onComplete={setFinalSong} />
+            <span>all the way down</span>
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
             Feed it a song. It remixes forever — never loops, always evolving.

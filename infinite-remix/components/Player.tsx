@@ -201,8 +201,10 @@ export default function Player({ dna }: PlayerProps) {
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
         <div className="text-center space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            It's <span className="text-orange-500 italic">a song</span> all the way down
+          <h1 className="flex flex-col items-center text-3xl sm:text-4xl font-bold tracking-tight gap-1 sm:gap-2 mb-2">
+            <span>It's</span>
+            <span className="text-orange-500 italic block text-center min-w-[200px]">a song</span>
+            <span>all the way down</span>
           </h1>
           <p className="text-slate-500 text-sm">
             {dna.meta.title} — {dna.meta.artist}
